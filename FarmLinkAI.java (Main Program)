@@ -1,0 +1,86 @@
+import java.util.*;
+
+public class FarmLinkAI {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        List<Farmer> farmers = FileManager.loadFarmers();
+
+        while (true) {
+            System.out.println("\n=========  FarmLink AI: Smart Farmer Network =========");
+            System.out.println("1. Register New Farmer");
+            System.out.println("2. Add Crop for a Farmer");
+            System.out.println("3. Show All Farmers");
+            System.out.println("4. Get Crop Recommendation");
+            System.out.println("5. Search Farmer by Location");
+            System.out.println("6. Exit");
+            System.out.print(" Enter choice: ");
+            int ch = sc.nextInt();
+            sc.nextLine();
+
+            switch (ch) {
+                case 1 -> {
+                    System.out.print("Enter Farmer ID: ");
+                    String id = sc.nextLine();
+                    System.out.print("Enter Name: ");
+                    String name = sc.nextLine();
+                    System.out.print("Enter Location: ");
+                    String location = sc.nextLine();
+                    farmers.add(new Farmer(id, name, location));
+                    FileManager.saveFarmers(farmers);
+                    System.out.println(" Farmer Registered Successfully!");
+                }
+                case 2 -> {
+                    System.out.print("Enter Farmer ID: ");
+                    String id = sc.nextLine();
+                    Farmer found = farmers.stream()
+                        .filter(f -> f.getId().equalsIgnoreCase(id))
+                        .findFirst().orElse(null);
+                    if (found == null) {
+                        System.out.println(" Farmer not found!");
+                    } else {
+                        System.out.print("Enter Crop Name: ");
+                        String crop = sc.nextLine();
+                        System.out.print("Enter Yield (tons): ");
+                        double yield = sc.nextDouble();
+                        System.out.print("Enter Price per ton (₹): ");
+                        double price = sc.nextDouble();
+                        sc.nextLine();
+                        found.addCrop(new Crop(crop, yield, price));
+                        FileManager.saveFarmers(farmers);
+                        System.out.println(" Crop added successfully!");
+                    }
+                }
+                case 3 -> {
+                    if (farmers.isEmpty()) System.out.println(" No farmers registered yet.");
+                    else farmers.forEach(System.out::println);
+                }
+                case 4 -> {
+                    System.out.print("Enter Farmer ID: ");
+                    String id = sc.nextLine();
+                    Farmer found = farmers.stream()
+                        .filter(f -> f.getId().equalsIgnoreCase(id))
+                        .findFirst().orElse(null);
+                    if (found == null) System.out.println(" Farmer not found!");
+                    else RecommendationEngine.suggestNextCrop(found);
+                }
+                case 5 -> {
+                    System.out.print("Enter Location: ");
+                    String loc = sc.nextLine();
+                    boolean found = false;
+                    for (Farmer f : farmers) {
+                        if (f.getLocation().equalsIgnoreCase(loc)) {
+                            System.out.println(f);
+                            found = true;
+                        }
+                    }
+                    if (!found) System.out.println(" No farmers found in " + loc);
+                }
+                case 6 -> {
+                    System.out.println(" Exiting FarmLink AI. Stay green and grow smart!");
+                    return;
+                }
+                default -> System.out.println(" Invalid choice!");
+            }
+        }
+    }
+}
